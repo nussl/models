@@ -1,0 +1,21 @@
+name: nussl-models
+
+channels:
+  - conda-forge
+  - pytorch
+
+dependencies:
+  - python=3.7
+  - pytorch
+  - ffmpeg
+  - sox
+  - resampy
+  - pip
+  - pip:
+    - scaper
+    - git+git://github.com/interactiveaudiolab/nussl@refactor
+    - git+https://github.com/google/gin-config
+    - IPython
+    - ffmpy
+    - tqdm
+    - termtables

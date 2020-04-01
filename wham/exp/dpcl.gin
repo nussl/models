@@ -1,0 +1,64 @@
+# Output folder is defined at runtime
+# ===================================
+output_folder._output_folder = None
+model_path.model_suffix = 'checkpoints/best.model.pth'
+
+# Things we want to sweep over
+# Give these to instantiate to
+# create multiple experiments
+# ============================
+sweep.parameters = {
+    'add_clip_gradient_handler.clip_value': [1e-4, 1e-3, 1e-2]
+}
+
+# Building up DPCL network
+# ========================
+nussl.ml.networks.builders.build_recurrent_dpcl.num_features = 129
+nussl.ml.networks.builders.build_recurrent_dpcl.hidden_size = 50
+nussl.ml.networks.builders.build_recurrent_dpcl.num_layers = 1
+nussl.ml.networks.builders.build_recurrent_dpcl.bidirectional = True
+nussl.ml.networks.builders.build_recurrent_dpcl.dropout = 0.3
+nussl.ml.networks.builders.build_recurrent_dpcl.embedding_size = 20
+nussl.ml.networks.builders.build_recurrent_dpcl.embedding_activation = 'sigmoid'
+
+# Build model, optimizer, scheduler
+# =================================
+torch.optim.Adam.lr = .001
+torch.optim.lr_scheduler.ReduceLROnPlateau.factor = 0.5
+torch.optim.lr_scheduler.ReduceLROnPlateau.patience = 5
+
+add_clip_gradient_handler.clip_value = 1e-2
+
+build_model_optimizer_scheduler.optimizer_class = \
+    @torch.optim.Adam
+build_model_optimizer_scheduler.scheduler_class = \
+    @torch.optim.lr_scheduler.ReduceLROnPlateau
+build_model_optimizer_scheduler.model_config = \
+    @nussl.ml.networks.builders.build_recurrent_dpcl()
+
+# Building up train arguments
+# ===========================
+train.output_folder = @output_folder()
+train.loss_dictionary = {
+    'DeepClusteringLoss': {'weight': 1.0}
+}
+train.device = "cuda"
+train.num_epochs = 1
+train.num_data_workers = 10
+train.batch_size = 25
+train.seed = 0
+
+# Building up evaluation arguments
+# ================================
+evaluate.output_folder = @output_folder()
+
+nussl.separation.deep.DeepClustering.model_path = @model_path()
+nussl.separation.deep.DeepClustering.num_sources = 4
+evaluate.separation_algorithm = @nussl.separation.deep.DeepClustering
+evaluate.block_on_gpu = True
+evaluate.num_workers = 4
+evaluate.seed = 0
+
+# Building up analysis arguments
+# ==============================
+analyze.output_folder = @output_folder()

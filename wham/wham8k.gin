@@ -1,0 +1,52 @@
+# Global dataset parameters
+# =========================
+nussl.STFTParams.window_length = 256
+nussl.STFTParams.hop_length = 64
+nussl.STFTParams.window_type = 'sqrt_hann'
+
+# unginify is a function to get around the fact that
+# gin objects can't be pickled.
+stft_params/unginify.kls = @nussl.STFTParams
+stft_params/unginify.kls_name = "nussl.STFTParams"
+
+nussl.datasets.WHAM.stft_params = @stft_params/unginify()
+nussl.datasets.WHAM.sample_rate = 8000
+nussl.datasets.WHAM.folder = %WHAM_ROOT
+nussl.datasets.WHAM.mix_folder = 'mix_clean'
+nussl.datasets.WHAM.mode = 'min'
+
+# Dataset transforms for train and val splits
+# ===========================================
+nussl.datasets.transforms.GetExcerpt.excerpt_length = 400
+nussl.datasets.transforms.Compose.transforms = [
+    @nussl.datasets.transforms.MagnitudeSpectrumApproximation(),
+    @nussl.datasets.transforms.MagnitudeWeights(),
+    @nussl.datasets.transforms.ToSeparationModel(),
+    @nussl.datasets.transforms.Cache(),
+    @nussl.datasets.transforms.GetExcerpt(),
+]
+nussl.datasets.WHAM.cache_populated = False
+
+# Below, macros come from your env.gin.
+#
+# Building train dataset
+# ======================
+train/nussl.datasets.transforms.Cache.location = %TRAIN_CACHE
+train/nussl.datasets.WHAM.split = 'tr'
+
+train/unginify_compose.tfm = @nussl.datasets.transforms.Compose
+train/nussl.datasets.WHAM.transform = @train/unginify_compose()
+build_datasets.train_dataset_class = @train/nussl.datasets.WHAM
+
+# Building val dataset
+# ====================
+val/nussl.datasets.transforms.Cache.location = %VAL_CACHE
+val/nussl.datasets.WHAM.split = 'cv'
+val/nussl.datasets.WHAM.transform = @nussl.datasets.transforms.Compose()
+build_datasets.val_dataset_class = @val/nussl.datasets.WHAM
+
+# Building test dataset
+# =====================
+test/nussl.datasets.WHAM.folder = %TEST_DATA
+test/nussl.datasets.WHAM.split = 'tt'
+build_datasets.test_dataset_class = @test/nussl.datasets.WHAM
