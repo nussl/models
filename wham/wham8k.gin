@@ -11,7 +11,7 @@ stft_params/unginify.kls_name = "nussl.STFTParams"
 
 nussl.datasets.WHAM.stft_params = @stft_params/unginify()
 nussl.datasets.WHAM.sample_rate = 8000
-nussl.datasets.WHAM.folder = %WHAM_ROOT
+nussl.datasets.WHAM.root = %WHAM_ROOT
 nussl.datasets.WHAM.mix_folder = 'mix_clean'
 nussl.datasets.WHAM.mode = 'min'
 
@@ -25,7 +25,12 @@ nussl.datasets.transforms.Compose.transforms = [
     @nussl.datasets.transforms.Cache(),
     @nussl.datasets.transforms.GetExcerpt(),
 ]
-nussl.datasets.WHAM.cache_populated = False
+
+# Caching
+# =======
+nussl.datasets.WHAM.cache_populated = True
+cache.num_cache_workers = 60
+cache.batch_size = 40
 
 # Below, macros come from your env.gin.
 #
@@ -36,17 +41,17 @@ train/nussl.datasets.WHAM.split = 'tr'
 
 train/unginify_compose.tfm = @nussl.datasets.transforms.Compose
 train/nussl.datasets.WHAM.transform = @train/unginify_compose()
-build_datasets.train_dataset_class = @train/nussl.datasets.WHAM
+train/build_dataset.dataset_class = @train/nussl.datasets.WHAM
 
 # Building val dataset
 # ====================
 val/nussl.datasets.transforms.Cache.location = %VAL_CACHE
 val/nussl.datasets.WHAM.split = 'cv'
-val/nussl.datasets.WHAM.transform = @nussl.datasets.transforms.Compose()
-build_datasets.val_dataset_class = @val/nussl.datasets.WHAM
+val/unginify_compose.tfm = @nussl.datasets.transforms.Compose
+val/nussl.datasets.WHAM.transform = @val/unginify_compose()
+val/build_dataset.dataset_class = @val/nussl.datasets.WHAM
 
 # Building test dataset
 # =====================
-test/nussl.datasets.WHAM.folder = %TEST_DATA
 test/nussl.datasets.WHAM.split = 'tt'
-build_datasets.test_dataset_class = @test/nussl.datasets.WHAM
+test/build_dataset.dataset_class = @test/nussl.datasets.WHAM

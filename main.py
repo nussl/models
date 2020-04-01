@@ -1,6 +1,7 @@
 import gin
 import argparse
 from src import train, cache, analyze, instantiate, evaluate
+import nussl
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
@@ -8,6 +9,7 @@ def parse_arguments():
     parser.add_argument('-exp', '--experiment_config', type=str)
     parser.add_argument('-dat', '--data_config', default=None, type=str)
     parser.add_argument('-env', '--environment_config', default=None, type=str)
+    parser.add_argument('-out', '--output_folder', type=str)
     args = parser.parse_args()
     return args
 
@@ -30,6 +32,6 @@ if __name__ == "__main__":
         evaluate()
         analyze()
     elif args.func == 'instantiate':
-        func(args.experiment_config)
+        func(args.output_folder)
     else:
         func()

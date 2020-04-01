@@ -14,12 +14,13 @@ sweep.parameters = {
 # Building up DPCL network
 # ========================
 nussl.ml.networks.builders.build_recurrent_dpcl.num_features = 129
-nussl.ml.networks.builders.build_recurrent_dpcl.hidden_size = 50
-nussl.ml.networks.builders.build_recurrent_dpcl.num_layers = 1
+nussl.ml.networks.builders.build_recurrent_dpcl.hidden_size = 600
+nussl.ml.networks.builders.build_recurrent_dpcl.num_layers = 4
 nussl.ml.networks.builders.build_recurrent_dpcl.bidirectional = True
 nussl.ml.networks.builders.build_recurrent_dpcl.dropout = 0.3
 nussl.ml.networks.builders.build_recurrent_dpcl.embedding_size = 20
-nussl.ml.networks.builders.build_recurrent_dpcl.embedding_activation = 'sigmoid'
+nussl.ml.networks.builders.build_recurrent_dpcl.embedding_activation = \
+    ['sigmoid', 'unit_norm']
 
 # Build model, optimizer, scheduler
 # =================================
@@ -43,8 +44,8 @@ train.loss_dictionary = {
     'DeepClusteringLoss': {'weight': 1.0}
 }
 train.device = "cuda"
-train.num_epochs = 1
-train.num_data_workers = 10
+train.num_epochs = 100
+train.num_data_workers = 1
 train.batch_size = 25
 train.seed = 0
 
@@ -53,10 +54,10 @@ train.seed = 0
 evaluate.output_folder = @output_folder()
 
 nussl.separation.deep.DeepClustering.model_path = @model_path()
-nussl.separation.deep.DeepClustering.num_sources = 4
+nussl.separation.deep.DeepClustering.num_sources = 2
 evaluate.separation_algorithm = @nussl.separation.deep.DeepClustering
 evaluate.block_on_gpu = True
-evaluate.num_workers = 4
+evaluate.num_workers = 1
 evaluate.seed = 0
 
 # Building up analysis arguments

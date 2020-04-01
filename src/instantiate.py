@@ -1,6 +1,7 @@
 import itertools
 import os
 import gin
+import logging
 
 @gin.configurable
 def sweep(parameters):
@@ -20,11 +21,7 @@ def sweep(parameters):
         sweep_as_str = '-'.join(sweep_as_str)
         yield sweep_as_str
 
-def instantiate(base_path):
-    folder = os.path.splitext(base_path)[0]
-    folder = folder.split('/')
-    folder.insert(-1, 'out')
-    folder = os.path.join(*folder)
+def instantiate(folder):
     os.makedirs(folder, exist_ok=True)
 
     def get_run_number(path):
@@ -41,6 +38,7 @@ def instantiate(base_path):
         )
         output_path = os.path.join(output_folder, 'config.gin')
         with open(output_path, 'w') as f:
+            logging.info(f'{swp} -> {output_path}')
             f.write(gin.config_str())
 
     run_number = get_run_number(folder) 

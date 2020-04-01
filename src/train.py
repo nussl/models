@@ -4,7 +4,8 @@ import gin
 import torch
 import os
 import logging
-import multiprocessing
+from torch import multiprocessing
+from ignite.contrib.handlers import ProgressBar
 
 @gin.configurable
 def add_clip_gradient_handler(engine, model, clip_value):
@@ -14,14 +15,14 @@ def add_clip_gradient_handler(engine, model, clip_value):
 
 def add_lr_scheduler_handler(engine, scheduler):
     @engine.on(nussl.ml.train.ValidationEvents.VALIDATION_COMPLETED)
-    def step_scheduler(trainer):
+    def step_scheduler(engine):
         val_loss = engine.state.epoch_history['validation/loss'][-1]
         scheduler.step(val_loss)
 
 @gin.configurable
 def build_model_optimizer_scheduler(model_config, optimizer_class, 
-                                    scheduler_class):
-    model = nussl.ml.SeparationModel(model_config)
+                                    scheduler_class, device='cuda'):
+    model = nussl.ml.SeparationModel(model_config).to(device)
     # the rest of optimizer params comes from gin
     optimizer = optimizer_class(model.parameters())
     scheduler = scheduler_class(optimizer)
@@ -35,7 +36,7 @@ def train(batch_size, loss_dictionary, num_data_workers, seed,
     with gin.config_scope('val'):
         val_dataset = build_dataset()
 
-    model, optimizer, scheduler = build_model_optimizer_scheduler()
+    model, optimizer, scheduler = build_model_optimizer_scheduler(device=device)
     logging.info(model)
     
     if not torch.cuda.is_available():
@@ -50,10 +51,10 @@ def train(batch_size, loss_dictionary, num_data_workers, seed,
     # Set up dataloader
     train_dataloader = torch.utils.data.DataLoader(
         train_dataset, num_workers=num_data_workers, 
-        batch_size=batch_size)
+        batch_size=batch_size, shuffle=True)
     val_dataloader = torch.utils.data.DataLoader(
         val_dataset, num_workers=num_data_workers, 
-        batch_size=batch_size)
+        batch_size=batch_size, shuffle=True)
 
     # Build the closures for each loop
     train_closure = nussl.ml.train.closures.TrainClosure(
@@ -69,17 +70,33 @@ def train(batch_size, loss_dictionary, num_data_workers, seed,
         val_data=val_dataloader, validator=val_engine)
     nussl.ml.train.add_stdout_handler(train_engine, val_engine)
     nussl.ml.train.add_tensorboard_handler(output_folder, train_engine)
+    nussl.ml.train.add_progress_bar_handler(train_engine, val_engine)
 
     # clip_value and scheduler come from gin config
     add_clip_gradient_handler(train_engine, model)
     add_lr_scheduler_handler(train_engine, scheduler)
 
     # run the engine
-    train_engine.run(train_dataloader)
+    train_engine.run(train_dataloader, max_epochs=num_epochs)
 
-def cache():
+@gin.configurable
+def cache(num_cache_workers, batch_size):
+    num_cache_workers = min(
+        num_cache_workers, multiprocessing.cpu_count())
     datasets = []
     for scope in ['train', 'val']:
         with gin.config_scope(scope):
             dataset = build_dataset()
-            nussl.ml.train.cache_dataset(dataset)
+            cache_dataloader = torch.utils.data.DataLoader(
+                dataset, num_workers=num_cache_workers, 
+                batch_size=batch_size)
+            nussl.ml.train.cache_dataset(cache_dataloader)
+    
+    alert = "Make sure to change cache_populated = True in your gin config!"
+    border = ''.join(['=' for _ in alert])
+
+    logging.info(
+        f'\n\n{border}\n'
+        f'{alert}\n'
+        f'{border}\n'
+    )
