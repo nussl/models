@@ -30,7 +30,8 @@ def instantiate(folder):
         ])
 
     def write_gin_config(output_folder, swp=''):
-        output_folder += f':{swp}'
+        if swp is not '':
+            output_folder += f':{swp}'
         os.makedirs(output_folder, exist_ok=True)
         gin.bind_parameter(
             'output_folder._output_folder', 

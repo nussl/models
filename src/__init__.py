@@ -3,3 +3,4 @@ from .train import train, cache
 from .evaluate import evaluate
 from .analyze import analyze
 from .instantiate import instantiate
+from .open_unmix_baseline import OpenUnmix

@@ -1,0 +1,112 @@
+# Macros:
+# ==============================================================================
+MUSDB_ROOT = '/home/data/musdb/raw/stems/'
+TRAIN_CACHE = '/media/sdg/cache/musdb/tr'
+VAL_CACHE = '/media/sdg/cache/musdb/cv'
+
+# Parameters for analyze:
+# ==============================================================================
+analyze.output_folder = @output_folder()
+analyze.notes = "Scale dependent SDR"
+
+# Parameters for BSSEvalScale:
+# ==============================================================================
+BSSEvalScale.compute_permutation = False
+BSSEvalScale.scaling = False
+
+# Parameters for test/build_dataset:
+# ==============================================================================
+test/build_dataset.dataset_class = @test/nussl.datasets.MUSDB18
+
+# Parameters for train/build_dataset:
+# ==============================================================================
+train/build_dataset.dataset_class = @train/nussl.datasets.MUSDB18
+
+# Parameters for val/build_dataset:
+# ==============================================================================
+val/build_dataset.dataset_class = @val/nussl.datasets.MUSDB18
+
+# Parameters for cache:
+# ==============================================================================
+cache.batch_size = 1
+cache.num_cache_workers = 1
+
+# Parameters for train/Cache:
+# ==============================================================================
+train/Cache.location = %TRAIN_CACHE
+
+# Parameters for val/Cache:
+# ==============================================================================
+val/Cache.location = %VAL_CACHE
+
+# Parameters for Compose:
+# ==============================================================================
+Compose.transforms = \
+    [@nussl.datasets.transforms.MagnitudeSpectrumApproximation(),
+     @nussl.datasets.transforms.MagnitudeWeights(),
+     @nussl.datasets.transforms.ToSeparationModel(),
+     @nussl.datasets.transforms.Cache(),
+     @nussl.datasets.transforms.GetExcerpt()]
+
+# Parameters for evaluate:
+# ==============================================================================
+evaluate.block_on_gpu = True
+evaluate.num_workers = 10
+evaluate.output_folder = @output_folder()
+evaluate.seed = 0
+evaluate.separation_algorithm = @OpenUnmix
+evaluate.eval_class = @nussl.evaluation.BSSEvalScale
+
+# Parameters for GetExcerpt:
+# ==============================================================================
+GetExcerpt.excerpt_length = 400
+
+# Parameters for MUSDB18:
+# ==============================================================================
+MUSDB18.cache_populated = False
+MUSDB18.folder = %MUSDB_ROOT
+MUSDB18.stft_params = @stft_params/unginify()
+MUSDB18.subsets = ['train']
+
+# Parameters for test/MUSDB18:
+# ==============================================================================
+test/MUSDB18.subsets = ['test']
+
+# Parameters for train/MUSDB18:
+# ==============================================================================
+train/MUSDB18.split = 'train'
+train/MUSDB18.transform = @train/unginify_compose()
+
+# Parameters for val/MUSDB18:
+# ==============================================================================
+val/MUSDB18.split = 'valid'
+val/MUSDB18.transform = @val/unginify_compose()
+
+# Parameters for OpenUnmix:
+# ==============================================================================
+OpenUnmix.device = 'cuda'
+OpenUnmix.targets = ['vocals', 'bass', 'drums', 'other']
+
+# Parameters for output_folder:
+# ==============================================================================
+output_folder._output_folder = \
+    '/home/pseetharaman/Dropbox/research/nussl-models/musdb/exp/open-unmix-baseline/run1'
+
+# Parameters for STFTParams:
+# ==============================================================================
+STFTParams.hop_length = 1024
+STFTParams.window_length = 4096
+STFTParams.window_type = 'sqrt_hann'
+
+# Parameters for stft_params/unginify:
+# ==============================================================================
+stft_params/unginify.kls = @nussl.STFTParams
+stft_params/unginify.kls_name = 'nussl.STFTParams'
+
+# Parameters for train/unginify_compose:
+# ==============================================================================
+train/unginify_compose.tfm = @nussl.datasets.transforms.Compose
+
+# Parameters for val/unginify_compose:
+# ==============================================================================
+val/unginify_compose.tfm = @nussl.datasets.transforms.Compose

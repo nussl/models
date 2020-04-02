@@ -18,3 +18,4 @@ tests/local/
 scratch/
 **/*.pth
 **/tensorboard/
+**/*.json

@@ -71,6 +71,12 @@ module = 'nussl.separation.factorization'
 gin.external_configurable(nussl.separation.factorization.RPCA, module=module)
 gin.external_configurable(nussl.separation.factorization.ICA, module=module)
 
+# Evaluation
+module = 'nussl.evaluation'
+gin.external_configurable(nussl.evaluation.BSSEvalScale, module=module)
+gin.external_configurable(nussl.evaluation.BSSEvalV4, module=module)
+gin.external_configurable(nussl.evaluation.PrecisionRecallFScore, module=module)
+
 # General nussl things
 gin.external_configurable(nussl.AudioSignal, module='nussl')
 gin.external_configurable(nussl.STFTParams, module='nussl')

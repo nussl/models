@@ -1,0 +1,55 @@
+# Global dataset parameters
+# =========================
+nussl.STFTParams.window_length = 4096
+nussl.STFTParams.hop_length = 1024
+nussl.STFTParams.window_type = 'sqrt_hann'
+
+# unginify is a function to get around the fact that
+# gin objects can't be pickled.
+stft_params/unginify.kls = @nussl.STFTParams
+stft_params/unginify.kls_name = "nussl.STFTParams"
+
+nussl.datasets.MUSDB18.stft_params = @stft_params/unginify()
+nussl.datasets.MUSDB18.folder = %MUSDB_ROOT
+nussl.datasets.MUSDB18.subsets = ['train']
+
+# Dataset transforms for train and val splits
+# ===========================================
+nussl.datasets.transforms.GetExcerpt.excerpt_length = 400
+nussl.datasets.transforms.Compose.transforms = [
+    @nussl.datasets.transforms.MagnitudeSpectrumApproximation(),
+    @nussl.datasets.transforms.MagnitudeWeights(),
+    @nussl.datasets.transforms.ToSeparationModel(),
+    @nussl.datasets.transforms.Cache(),
+    @nussl.datasets.transforms.GetExcerpt(),
+]
+
+# Caching
+# =======
+nussl.datasets.MUSDB18.cache_populated = False
+cache.num_cache_workers = 1
+cache.batch_size = 1
+
+# Below, macros come from your env.gin.
+#
+# Building train dataset
+# ======================
+train/nussl.datasets.transforms.Cache.location = %TRAIN_CACHE
+train/nussl.datasets.MUSDB18.split = 'train'
+
+train/unginify_compose.tfm = @nussl.datasets.transforms.Compose
+train/nussl.datasets.MUSDB18.transform = @train/unginify_compose()
+train/build_dataset.dataset_class = @train/nussl.datasets.MUSDB18
+
+# Building val dataset
+# ====================
+val/nussl.datasets.transforms.Cache.location = %VAL_CACHE
+val/nussl.datasets.MUSDB18.split = 'valid'
+val/unginify_compose.tfm = @nussl.datasets.transforms.Compose
+val/nussl.datasets.MUSDB18.transform = @val/unginify_compose()
+val/build_dataset.dataset_class = @val/nussl.datasets.MUSDB18
+
+# Building test dataset
+# =====================
+test/nussl.datasets.MUSDB18.subsets = ['test']
+test/build_dataset.dataset_class = @test/nussl.datasets.MUSDB18
