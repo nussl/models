@@ -11,6 +11,7 @@ dependencies:
   - sox
   - resampy
   - pip
+  - redis
   - pip:
     - scaper
     - git+git://github.com/interactiveaudiolab/nussl@refactor
