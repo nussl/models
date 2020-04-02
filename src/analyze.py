@@ -57,7 +57,7 @@ def analyze(output_folder, notes=None):
 
     line_break = mean_report_card.index('\n')
 
-    def _format_title(title, marker="-"):
+    def _format_title(title, marker=" "):
         pad = (line_break - len(title)) // 2
         pad = ''.join([marker for _ in range(pad)])
         border = pad + title + pad
