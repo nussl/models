@@ -8,6 +8,14 @@ from torch import multiprocessing
 from ignite.contrib.handlers import ProgressBar
 
 @gin.configurable
+def add_train_handlers(engine, model, scheduler, handler_names):
+    for handler_name in handler_names:
+        if handler_name == "add_clip_gradient_handler":
+            add_clip_gradient_handler(engine, model)
+        elif handler_name == "add_lr_scheduler_handler":
+            add_lr_scheduler_handler(engine, scheduler)
+
+@gin.configurable
 def add_clip_gradient_handler(engine, model, clip_value):
     @engine.on(nussl.ml.train.BackwardsEvents.BACKWARDS_COMPLETED)
     def clip_gradient(engine):
@@ -73,9 +81,14 @@ def train(batch_size, loss_dictionary, num_data_workers, seed,
     nussl.ml.train.add_progress_bar_handler(train_engine, val_engine)
 
     # clip_value and scheduler come from gin config
-    add_clip_gradient_handler(train_engine, model)
-    add_lr_scheduler_handler(train_engine, scheduler)
-
+    add_train_handlers(
+        engine, model, scheduler, 
+        [
+            'add_clip_gradient_handler',
+            'add_lr_scheduler_handler'
+        ]
+    )
+    
     # run the engine
     train_engine.run(train_dataloader, max_epochs=num_epochs)
 

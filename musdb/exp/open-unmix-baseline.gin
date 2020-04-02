@@ -14,7 +14,6 @@ evaluate.num_workers = 10
 evaluate.seed = 0
 
 nussl.evaluation.BSSEvalScale.compute_permutation = False
-nussl.evaluation.BSSEvalScale.scale = False
 nussl.evaluation.BSSEvalScale.source_labels = ['bass', 'drums', 'other', 'vocals']
 evaluate.eval_class = @nussl.evaluation.BSSEvalScale
 

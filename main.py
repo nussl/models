@@ -2,6 +2,12 @@ import gin
 import argparse
 from src import train, cache, analyze, instantiate, evaluate
 import nussl
+import subprocess
+
+def edit(experiment_config):
+    subprocess.run([
+        f'vim {experiment_config}'
+    ], shell=True)
 
 def parse_arguments():
     parser = argparse.ArgumentParser()
@@ -33,5 +39,7 @@ if __name__ == "__main__":
         analyze()
     elif args.func == 'instantiate':
         func(args.output_folder)
+    elif args.func == 'edit':
+        func(args.experiment_config)
     else:
         func()

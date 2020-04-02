@@ -8,13 +8,13 @@ model_path.model_suffix = 'checkpoints/best.model.pth'
 # create multiple experiments
 # ============================
 sweep.parameters = {
-    'add_clip_gradient_handler.clip_value': [1e-2]
+    'add_clip_gradient_handler.clip_value': [1e-3]
 }
 
 # Building up OpenUnmix network
 # =============================
 nussl.ml.networks.builders.build_open_unmix_like.num_features = 129
-nussl.ml.networks.builders.build_open_unmix_like.hidden_size = 512
+nussl.ml.networks.builders.build_open_unmix_like.hidden_size = 1024
 nussl.ml.networks.builders.build_open_unmix_like.num_layers = 3
 nussl.ml.networks.builders.build_open_unmix_like.bidirectional = True
 nussl.ml.networks.builders.build_open_unmix_like.dropout = 0.4
@@ -31,7 +31,7 @@ torch.optim.Adam.lr = .001
 torch.optim.lr_scheduler.ReduceLROnPlateau.factor = 0.5
 torch.optim.lr_scheduler.ReduceLROnPlateau.patience = 5
 
-add_clip_gradient_handler.clip_value = 1e-2
+add_clip_gradient_handler.clip_value = 1e-3
 
 build_model_optimizer_scheduler.optimizer_class = \
     @torch.optim.Adam
@@ -62,10 +62,19 @@ evaluate.output_folder = @output_folder()
 
 nussl.separation.deep.DeepMaskEstimation.model_path = @model_path()
 evaluate.separation_algorithm = @nussl.separation.deep.DeepMaskEstimation
+
+nussl.evaluation.BSSEvalScale.compute_permutation = True
+nussl.evaluation.BSSEvalScale.scaling = True
+nussl.evaluation.BSSEvalScale.source_labels = ['s1', 's2']
+
 evaluate.block_on_gpu = True
 evaluate.num_workers = 1
 evaluate.seed = 0
+evaluate.eval_class = @nussl.evaluation.BSSEvalScale
 
 # Building up analysis arguments
 # ==============================
 analyze.output_folder = @output_folder()
+analyze.notes = (
+    "Bigger OpenUnmix model."
+)
