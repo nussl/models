@@ -7,7 +7,10 @@ VAL_CACHE = '/media/sdg/cache/musdb/cv'
 # Parameters for analyze:
 # ==============================================================================
 analyze.output_folder = @output_folder()
-analyze.notes = "Scale invariant SDR"
+analyze.notes = (
+    "Uses scale-invariant BSSEval metrics. Evaluated on MUSDB18 "
+    "at 44100 Hz sample rate."
+)
 
 # Parameters for BSSEvalScale:
 # ==============================================================================

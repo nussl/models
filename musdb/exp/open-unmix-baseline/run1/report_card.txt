@@ -33,4 +33,5 @@
                                                                   
                               NOTES                               
                                                                   
-Scale dependent SDR
+Uses scale-dependent BSSEval metrics. Evaluated on MUSDB18 at
+44100 Hz sample rate.

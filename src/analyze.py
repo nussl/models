@@ -4,6 +4,7 @@ import os
 import glob
 import gin
 import numpy as np
+import textwrap
 
 def _get_mean_and_std(df):
     excluded_columns = ['source', 'file']
@@ -77,6 +78,7 @@ def analyze(output_folder, notes=None):
     )
     
     if notes is not None:
+        notes = '\n'.join(textwrap.wrap(notes, line_break))
         report_card += (
             f"{_format_title('')}\n"
             f"{_format_title(' NOTES ')}\n"

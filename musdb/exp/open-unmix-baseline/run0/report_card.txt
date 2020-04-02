@@ -33,4 +33,5 @@
                                                                   
                               NOTES                               
                                                                   
-Scale invariant SDR
+Uses scale-invariant BSSEval metrics. Evaluated on MUSDB18 at
+44100 Hz sample rate.
