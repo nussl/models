@@ -33,5 +33,5 @@
                                                                   
                               NOTES                               
                                                                   
-Uses scale-dependent BSSEval metrics. Evaluated on MUSDB18 at
+Uses signal-to-noise ratio BSSEval metrics. Evaluated on MUSDB18 at
 44100 Hz sample rate.
