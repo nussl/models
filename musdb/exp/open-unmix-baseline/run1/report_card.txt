@@ -34,4 +34,4 @@
                                                   NOTES                                                   
                                                                                                         
 Using BSSEvalV4 metrics on MUSDB 44.1Khz sample rate. Lower table has median of all tracks, with each
-track represented by the median of all frames. Frames are 1 second in length with 1 second hops.
+track represented by the median of all frames. Frames are 2 seconds in length with 1.5 second hops.
