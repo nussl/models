@@ -6,17 +6,18 @@ VAL_CACHE = '/media/sdg/cache/musdb/cv'
 
 # Parameters for analyze:
 # ==============================================================================
-analyze.notes = (
-	'Using BSSEvalV4 metrics on MUSDB 44.1Khz sample rate. Lower table '
-	'has median of all tracks, with each track represented by the median '
-	'of all frames. Frames are 2 seconds in length with 1.5 second hops.'
-)
 analyze.output_folder = @output_folder()
+analyze.notes = (
+    "BSSEvalScale metrics computed as described in SDR: Half Baked or Well Done? "
+    "These are computed by comparing the entire estimate with respect to the "
+    "references all at once, rather than in windows with a hop length."
+)
 
-# Parameters for BSSEvalV4:
+# Parameters for BSSEvalScale:
 # ==============================================================================
-BSSEvalV4.compute_permutation = False
-BSSEvalV4.source_labels = ['bass', 'drums', 'other', 'vocals']
+BSSEvalScale.compute_permutation = False
+BSSEvalScale.compute_sir_sar = False
+BSSEvalScale.source_labels = ['bass', 'drums', 'other', 'vocals']
 
 # Parameters for test/build_dataset:
 # ==============================================================================
@@ -55,7 +56,7 @@ Compose.transforms = \
 # Parameters for evaluate:
 # ==============================================================================
 evaluate.block_on_gpu = True
-evaluate.eval_class = @nussl.evaluation.BSSEvalV4
+evaluate.eval_class = @nussl.evaluation.BSSEvalScale
 evaluate.num_workers = 10
 evaluate.output_folder = @output_folder()
 evaluate.seed = 0
@@ -94,7 +95,7 @@ OpenUnmix.targets = ['bass', 'drums', 'other', 'vocals']
 # Parameters for output_folder:
 # ==============================================================================
 output_folder._output_folder = \
-    '/home/pseetharaman/Dropbox/research/nussl-models/musdb/exp/open-unmix-baseline/run1'
+    '/home/pseetharaman/Dropbox/research/nussl-models/musdb/exp/open-unmix-baseline/run3'
 
 # Parameters for STFTParams:
 # ==============================================================================
