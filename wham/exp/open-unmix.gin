@@ -8,14 +8,14 @@ model_path.model_suffix = 'checkpoints/best.model.pth'
 # create multiple experiments
 # ============================
 sweep.parameters = {
-    'add_clip_gradient_handler.clip_value': [1e-3]
+    'add_clip_gradient_handler.clip_value': [1e-2]
 }
 
 # Building up OpenUnmix network
 # =============================
 nussl.ml.networks.builders.build_open_unmix_like.num_features = 129
 nussl.ml.networks.builders.build_open_unmix_like.hidden_size = 1024
-nussl.ml.networks.builders.build_open_unmix_like.num_layers = 3
+nussl.ml.networks.builders.build_open_unmix_like.num_layers = 4
 nussl.ml.networks.builders.build_open_unmix_like.bidirectional = True
 nussl.ml.networks.builders.build_open_unmix_like.dropout = 0.4
 nussl.ml.networks.builders.build_open_unmix_like.num_sources = 2
@@ -31,7 +31,7 @@ torch.optim.Adam.lr = .001
 torch.optim.lr_scheduler.ReduceLROnPlateau.factor = 0.5
 torch.optim.lr_scheduler.ReduceLROnPlateau.patience = 5
 
-add_clip_gradient_handler.clip_value = 1e-3
+add_clip_gradient_handler.clip_value = 1e-2
 
 build_model_optimizer_scheduler.optimizer_class = \
     @torch.optim.Adam
@@ -44,10 +44,10 @@ build_model_optimizer_scheduler.model_config = \
 # ===========================
 train.output_folder = @output_folder()
 train.loss_dictionary = {
-    'DeepClusteringLoss': {'weight': .025},
+    'DeepClusteringLoss': {'weight': .01},
     'PermutationInvariantLoss': {
         'args': ['L1Loss'],
-        'weight': .975,
+        'weight': .99,
     }
 }
 train.device = "cuda"
@@ -64,7 +64,6 @@ nussl.separation.deep.DeepMaskEstimation.model_path = @model_path()
 evaluate.separation_algorithm = @nussl.separation.deep.DeepMaskEstimation
 
 nussl.evaluation.BSSEvalScale.compute_permutation = True
-nussl.evaluation.BSSEvalScale.scaling = True
 nussl.evaluation.BSSEvalScale.source_labels = ['s1', 's2']
 
 evaluate.block_on_gpu = True

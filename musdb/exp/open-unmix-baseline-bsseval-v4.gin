@@ -1,0 +1,23 @@
+# Output folder is defined at runtime
+# ===================================
+output_folder._output_folder = None
+
+# Building up evaluation arguments
+# ================================
+evaluate.output_folder = @output_folder()
+
+OpenUnmix.targets = ['bass', 'drums', 'other', 'vocals']
+OpenUnmix.device = 'cuda'
+evaluate.separation_algorithm = @OpenUnmix
+evaluate.block_on_gpu = True
+evaluate.num_workers = 10
+evaluate.seed = 0
+
+nussl.evaluation.BSSEvalV4.compute_permutation = False
+nussl.evaluation.BSSEvalV4.source_labels = ['bass', 'drums', 'other', 'vocals']
+evaluate.eval_class = @nussl.evaluation.BSSEvalV4
+
+# Building up analysis arguments
+# ==============================
+analyze.output_folder = @output_folder()
+analyze.notes = "Using BSSEvalV4 metrics on MUSDB 44.1Khz sample rate."

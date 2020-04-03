@@ -82,7 +82,7 @@ def train(batch_size, loss_dictionary, num_data_workers, seed,
 
     # clip_value and scheduler come from gin config
     add_train_handlers(
-        engine, model, scheduler, 
+        train_engine, model, scheduler, 
         [
             'add_clip_gradient_handler',
             'add_lr_scheduler_handler'
