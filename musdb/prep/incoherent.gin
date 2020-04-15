@@ -1,0 +1,45 @@
+SCENE_DURATION = 10
+NUM_TRAIN_MIXTURES = 20000
+NUM_VAL_MIXTURES = 5000
+
+mix_with_scaper.scene_duration = %SCENE_DURATION
+mix_with_scaper.sample_rate = 16000
+mix_with_scaper.bitdepth = 16
+mix_with_scaper.background_path = None
+
+mix_with_scaper.event_parameters = {
+    'label': ('choose', []),
+    'source_file': ('choose', []),
+    'source_time': ('uniform', 0, 1000),
+    'event_time': ('const', 0),
+    'event_duration': ('const', %SCENE_DURATION),
+    'snr': ('uniform', -2.5, 2.5),
+    'pitch_shift': ('uniform', -2, 2),
+    'time_stretch': ('const', 1)
+}
+
+mix_with_scaper.coherent = False
+mix_with_scaper.num_sources = 4
+mix_with_scaper.ref_db = -40
+mix_with_scaper.allow_repeated_label = False
+mix_with_scaper.seed = 0
+
+mix_with_scaper.num_workers = 10
+
+train/mix_with_scaper.num_mixtures = %NUM_TRAIN_MIXTURES
+train/target/join_path.base_path = %SCAPER_PATH
+train/target/join_path.relative_path = 'incoherent/train'
+train/mix_with_scaper.target_folder = @train/target/join_path()
+
+train/source/join_path.base_path = %SCAPER_SOURCE_MATERIAL
+train/source/join_path.relative_path = 'train'
+train/mix_with_scaper.foreground_path = @train/source/join_path()
+
+val/mix_with_scaper.num_mixtures = %NUM_VAL_MIXTURES
+val/target/join_path.base_path = %SCAPER_PATH
+val/target/join_path.relative_path = 'incoherent/val'
+val/mix_with_scaper.target_folder = @val/target/join_path()
+
+val/source/join_path.base_path = %SCAPER_SOURCE_MATERIAL
+val/source/join_path.relative_path = 'valid'
+val/mix_with_scaper.foreground_path = @val/source/join_path()

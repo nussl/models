@@ -136,7 +136,7 @@ def separate(
     source_names = []
     V = []
 
-    for j, target in enumerate(tqdm.tqdm(targets)):
+    for j, target in enumerate(targets):
         unmix_target = load_model(
             target=target,
             model_name=model_name,
@@ -161,10 +161,8 @@ def separate(
         V = norbert.residual_model(V, X, alpha if softmask else 1)
         source_names += (['residual'] if len(targets) > 1
                          else ['accompaniment'])
-
     Y = norbert.wiener(V, X.astype(np.complex128), niter,
                        use_softmask=softmask)
-
     estimates = {}
     for j, name in enumerate(source_names):
         audio_hat = istft(
@@ -173,7 +171,6 @@ def separate(
             n_hopsize=unmix_target.stft.n_hop
         )
         estimates[name] = audio_hat.T
-
     return estimates
 
 

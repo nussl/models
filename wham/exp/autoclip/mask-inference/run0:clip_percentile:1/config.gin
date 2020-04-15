@@ -1,0 +1,168 @@
+# Macros:
+# ==============================================================================
+TRAIN_CACHE = '/media/sdg/cache/tr'
+VAL_CACHE = '/media/sdg/cache/cv'
+WHAM_ROOT = '/home/data/wham'
+
+# Parameters for Adam:
+# ==============================================================================
+Adam.lr = 0.001
+
+# Parameters for add_autoclip_gradient_handler:
+# ==============================================================================
+add_autoclip_gradient_handler.clip_percentile = 1
+
+# Parameters for add_train_handlers:
+# ==============================================================================
+add_train_handlers.handler_names = \
+    ['add_lr_scheduler_handler', 'add_autoclip_gradient_handler']
+
+# Parameters for analyze:
+# ==============================================================================
+analyze.output_folder = @output_folder()
+
+# Parameters for BSSEvalScale:
+# ==============================================================================
+BSSEvalScale.compute_permutation = True
+BSSEvalScale.source_labels = ['s1', 's2']
+
+# Parameters for test/build_dataset:
+# ==============================================================================
+test/build_dataset.dataset_class = @test/nussl.datasets.WHAM
+
+# Parameters for train/build_dataset:
+# ==============================================================================
+train/build_dataset.dataset_class = @train/nussl.datasets.WHAM
+
+# Parameters for val/build_dataset:
+# ==============================================================================
+val/build_dataset.dataset_class = @val/nussl.datasets.WHAM
+
+# Parameters for build_model_optimizer_scheduler:
+# ==============================================================================
+build_model_optimizer_scheduler.model_config = \
+    @nussl.ml.networks.builders.build_recurrent_mask_inference()
+build_model_optimizer_scheduler.optimizer_class = @torch.optim.Adam
+build_model_optimizer_scheduler.scheduler_class = \
+    @torch.optim.lr_scheduler.ReduceLROnPlateau
+
+# Parameters for build_recurrent_mask_inference:
+# ==============================================================================
+build_recurrent_mask_inference.bidirectional = True
+build_recurrent_mask_inference.dropout = 0.3
+build_recurrent_mask_inference.hidden_size = 600
+build_recurrent_mask_inference.mask_activation = ['sigmoid']
+build_recurrent_mask_inference.num_features = 129
+build_recurrent_mask_inference.num_layers = 4
+build_recurrent_mask_inference.num_sources = 2
+
+# Parameters for cache:
+# ==============================================================================
+cache.batch_size = 40
+cache.num_cache_workers = 60
+
+# Parameters for train/Cache:
+# ==============================================================================
+train/Cache.location = %TRAIN_CACHE
+
+# Parameters for val/Cache:
+# ==============================================================================
+val/Cache.location = %VAL_CACHE
+
+# Parameters for Compose:
+# ==============================================================================
+Compose.transforms = \
+    [@nussl.datasets.transforms.MagnitudeSpectrumApproximation(),
+     @nussl.datasets.transforms.MagnitudeWeights(),
+     @nussl.datasets.transforms.ToSeparationModel(),
+     @nussl.datasets.transforms.Cache(),
+     @nussl.datasets.transforms.GetExcerpt()]
+
+# Parameters for DeepMaskEstimation:
+# ==============================================================================
+DeepMaskEstimation.model_path = @model_path()
+
+# Parameters for evaluate:
+# ==============================================================================
+evaluate.block_on_gpu = True
+evaluate.eval_class = @nussl.evaluation.BSSEvalScale
+evaluate.num_workers = 1
+evaluate.output_folder = @output_folder()
+evaluate.seed = 0
+evaluate.separation_algorithm = @nussl.separation.deep.DeepMaskEstimation
+
+# Parameters for GetExcerpt:
+# ==============================================================================
+GetExcerpt.excerpt_length = 400
+
+# Parameters for model_path:
+# ==============================================================================
+model_path.model_suffix = 'checkpoints/best.model.pth'
+
+# Parameters for output_folder:
+# ==============================================================================
+output_folder._output_folder = \
+    '/home/pseetharaman/Dropbox/research/nussl-models/wham/exp/autoclip/mask-inference/run0:clip_percentile:1'
+
+# Parameters for ReduceLROnPlateau:
+# ==============================================================================
+ReduceLROnPlateau.factor = 0.5
+ReduceLROnPlateau.patience = 5
+
+# Parameters for STFTParams:
+# ==============================================================================
+STFTParams.hop_length = 64
+STFTParams.window_length = 256
+STFTParams.window_type = 'sqrt_hann'
+
+# Parameters for sweep:
+# ==============================================================================
+sweep.parameters = \
+    {'add_autoclip_gradient_handler.clip_percentile': [1, 10, 25, 50, 90, 100]}
+
+# Parameters for train:
+# ==============================================================================
+train.batch_size = 25
+train.device = 'cuda'
+train.loss_dictionary = \
+    {'PermutationInvariantLoss': {'args': ['L1Loss'], 'weight': 1.0}}
+train.num_data_workers = 1
+train.num_epochs = 100
+train.output_folder = @output_folder()
+train.seed = 0
+
+# Parameters for stft_params/unginify:
+# ==============================================================================
+stft_params/unginify.kls = @nussl.STFTParams
+stft_params/unginify.kls_name = 'nussl.STFTParams'
+
+# Parameters for train/unginify_compose:
+# ==============================================================================
+train/unginify_compose.tfm = @nussl.datasets.transforms.Compose
+
+# Parameters for val/unginify_compose:
+# ==============================================================================
+val/unginify_compose.tfm = @nussl.datasets.transforms.Compose
+
+# Parameters for WHAM:
+# ==============================================================================
+WHAM.cache_populated = True
+WHAM.mix_folder = 'mix_clean'
+WHAM.mode = 'min'
+WHAM.root = %WHAM_ROOT
+WHAM.sample_rate = 8000
+WHAM.stft_params = @stft_params/unginify()
+
+# Parameters for test/WHAM:
+# ==============================================================================
+test/WHAM.split = 'tt'
+
+# Parameters for train/WHAM:
+# ==============================================================================
+train/WHAM.split = 'tr'
+train/WHAM.transform = @train/unginify_compose()
+
+# Parameters for val/WHAM:
+# ==============================================================================
+val/WHAM.split = 'cv'
+val/WHAM.transform = @val/unginify_compose()

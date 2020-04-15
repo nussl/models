@@ -17,38 +17,46 @@ nussl.datasets.WHAM.mode = 'min'
 
 # Dataset transforms for train and val splits
 # ===========================================
-nussl.datasets.transforms.GetExcerpt.excerpt_length = 400
-nussl.datasets.transforms.Compose.transforms = [
-    @nussl.datasets.transforms.MagnitudeSpectrumApproximation(),
-    @nussl.datasets.transforms.MagnitudeWeights(),
-    @nussl.datasets.transforms.ToSeparationModel(),
-    @nussl.datasets.transforms.Cache(),
-    @nussl.datasets.transforms.GetExcerpt(),
+build_transforms.transform_names_and_args = [
+    ('PhaseSensitiveSpectrumApproximation', {}),
+    ('GetAudio', {}),
+    ('MagnitudeWeights', {}),
+    ('ToSeparationModel', {}),
+    ('Cache', {}),
+    ('GetExcerpt', 
+        {
+            'excerpt_length': 400
+        }
+    ),
+    ('GetExcerpt', 
+        {
+            'tf_keys': ['mix_audio', 'source_audio'], 
+            'time_dim': 1,
+            'excerpt_length': 32000
+        }
+    )
 ]
 
 # Caching
 # =======
 nussl.datasets.WHAM.cache_populated = True
-cache.num_cache_workers = 60
+cache.num_cache_workers = 40
 cache.batch_size = 40
 
 # Below, macros come from your env.gin.
 #
 # Building train dataset
 # ======================
-train/nussl.datasets.transforms.Cache.location = %TRAIN_CACHE
+train/build_transforms.cache_location = %TRAIN_CACHE
 train/nussl.datasets.WHAM.split = 'tr'
-
-train/unginify_compose.tfm = @nussl.datasets.transforms.Compose
-train/nussl.datasets.WHAM.transform = @train/unginify_compose()
+train/nussl.datasets.WHAM.transform = @train/build_transforms()
 train/build_dataset.dataset_class = @train/nussl.datasets.WHAM
 
 # Building val dataset
 # ====================
-val/nussl.datasets.transforms.Cache.location = %VAL_CACHE
+val/build_transforms.cache_location = %VAL_CACHE
 val/nussl.datasets.WHAM.split = 'cv'
-val/unginify_compose.tfm = @nussl.datasets.transforms.Compose
-val/nussl.datasets.WHAM.transform = @val/unginify_compose()
+val/nussl.datasets.WHAM.transform = @val/build_transforms()
 val/build_dataset.dataset_class = @val/nussl.datasets.WHAM
 
 # Building test dataset

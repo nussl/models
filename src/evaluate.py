@@ -1,16 +1,18 @@
 import nussl
 import os
 import json
-from concurrent.futures import ThreadPoolExecutor
+from concurrent.futures import ThreadPoolExecutor, ProcessPoolExecutor
 import tqdm
 import gin
 from .helpers import build_dataset
+import logging
 
 @gin.configurable
 def evaluate(output_folder, separation_algorithm, eval_class, 
              block_on_gpu, num_workers, seed):
     nussl.utils.seed(seed)
-
+    logging.info(gin.operative_config_str())
+    
     with gin.config_scope('test'):
         test_dataset = build_dataset()
     
@@ -34,6 +36,8 @@ def evaluate(output_folder, separation_algorithm, eval_class,
             gpu_output = gpu_algorithm.extract_features()
         return gpu_output
 
+    pbar = tqdm.tqdm(total=len(test_dataset))
+
     def separate_and_evaluate(item, gpu_output):
         if set_model_to_none:
             separator = separation_algorithm(item['mix'], model_path=None)
@@ -50,13 +54,16 @@ def evaluate(output_folder, separation_algorithm, eval_class,
             results_folder, f"{item['mix'].file_name}.json")
         with open(output_path, 'w') as f:
             json.dump(scores, f, indent=2)
+        pbar.update(1)
     
     pool = ThreadPoolExecutor(max_workers=num_workers)
-
-    for i, item in enumerate(tqdm.tqdm(test_dataset)):
+    
+    for i in range(len(test_dataset)):
+        item = test_dataset[i]
         gpu_output = forward_on_gpu(item['mix'])
         if i == 0:
             separate_and_evaluate(item, gpu_output)
-        else:
-            pool.submit(separate_and_evaluate, item, gpu_output)
+            continue
+        pool.submit(separate_and_evaluate, item, gpu_output)
+    
     pool.shutdown(wait=True)

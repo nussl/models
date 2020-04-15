@@ -1,7 +1,7 @@
 # Global dataset parameters
 # =========================
-nussl.STFTParams.window_length = 4096
-nussl.STFTParams.hop_length = 1024
+nussl.STFTParams.window_length = 512
+nussl.STFTParams.hop_length = 128
 nussl.STFTParams.window_type = 'sqrt_hann'
 
 # unginify is a function to get around the fact that
@@ -9,47 +9,58 @@ nussl.STFTParams.window_type = 'sqrt_hann'
 stft_params/unginify.kls = @nussl.STFTParams
 stft_params/unginify.kls_name = "nussl.STFTParams"
 
+nussl.datasets.Scaper.stft_params = @stft_params/unginify()
 nussl.datasets.MUSDB18.stft_params = @stft_params/unginify()
 nussl.datasets.MUSDB18.folder = %MUSDB_ROOT
 nussl.datasets.MUSDB18.subsets = ['train']
 
 # Dataset transforms for train and val splits
 # ===========================================
-nussl.datasets.transforms.GetExcerpt.excerpt_length = 400
-nussl.datasets.transforms.Compose.transforms = [
-    @nussl.datasets.transforms.MagnitudeSpectrumApproximation(),
-    @nussl.datasets.transforms.MagnitudeWeights(),
-    @nussl.datasets.transforms.ToSeparationModel(),
-    @nussl.datasets.transforms.Cache(),
-    @nussl.datasets.transforms.GetExcerpt(),
+build_transforms.transform_names_and_args = [
+    ('PhaseSensitiveSpectrumApproximation', {}),
+    ('GetAudio', {}),
+    ('MagnitudeWeights', {}),
+    ('ToSeparationModel', {}),
+    ('Cache', {}),
+    ('GetExcerpt', 
+        {
+            'excerpt_length': 400
+        }
+    ),
+    ('GetExcerpt', 
+        {
+            'tf_keys': ['mix_audio', 'source_audio'], 
+            'time_dim': 1,
+            'excerpt_length': 64000
+        }
+    )
 ]
 
 # Caching
 # =======
-nussl.datasets.MUSDB18.cache_populated = False
-cache.num_cache_workers = 1
-cache.batch_size = 1
+nussl.datasets.Scaper.cache_populated = False
+cache.num_cache_workers = 40
+cache.batch_size = 40
 
 # Below, macros come from your env.gin.
 #
 # Building train dataset
 # ======================
 train/nussl.datasets.transforms.Cache.location = %TRAIN_CACHE
-train/nussl.datasets.MUSDB18.split = 'train'
-
-train/unginify_compose.tfm = @nussl.datasets.transforms.Compose
-train/nussl.datasets.MUSDB18.transform = @train/unginify_compose()
-train/build_dataset.dataset_class = @train/nussl.datasets.MUSDB18
+train/nussl.datasets.Scaper.folder = %TRAIN_FOLDER
+train/nussl.datasets.WHAM.transform = @train/build_transforms()
+train/build_dataset.dataset_class = @train/nussl.datasets.WHAM
 
 # Building val dataset
 # ====================
 val/nussl.datasets.transforms.Cache.location = %VAL_CACHE
-val/nussl.datasets.MUSDB18.split = 'valid'
-val/unginify_compose.tfm = @nussl.datasets.transforms.Compose
-val/nussl.datasets.MUSDB18.transform = @val/unginify_compose()
-val/build_dataset.dataset_class = @val/nussl.datasets.MUSDB18
+val/nussl.datasets.Scaper.folder = %VAL_FOLDER
+val/nussl.datasets.WHAM.transform = @val/build_transforms()
+val/build_dataset.dataset_class = @val/nussl.datasets.WHAM
 
 # Building test dataset
 # =====================
 test/nussl.datasets.MUSDB18.subsets = ['test']
 test/build_dataset.dataset_class = @test/nussl.datasets.MUSDB18
+test/nussl.datasets.MUSDB18.sample_rate = 16000
+test/nussl.datasets.MUSDB18.strict_sample_rate = False

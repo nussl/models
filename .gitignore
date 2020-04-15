@@ -19,3 +19,7 @@ scratch/
 **/*.pth
 **/tensorboard/
 **/*.json
+nohup.out
+**/secret
+**/modules/
+**/custom/

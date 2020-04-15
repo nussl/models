@@ -3,12 +3,10 @@
 output_folder._output_folder = None
 model_path.model_suffix = 'checkpoints/best.model.pth'
 
-# Things we want to sweep over
-# Give these to instantiate to
-# create multiple experiments
-# ============================
+# Sweep parameters
+# ================
 sweep.parameters = {
-    'add_clip_gradient_handler.clip_value': [1e-4, 1e-3, 1e-2]
+   "add_autoclip_gradient_handler.clip_percentile": [1, 10, 25, 50, 90, 100]
 }
 
 # Building up DPCL network
@@ -27,8 +25,6 @@ nussl.ml.networks.builders.build_recurrent_dpcl.embedding_activation = \
 torch.optim.Adam.lr = .001
 torch.optim.lr_scheduler.ReduceLROnPlateau.factor = 0.5
 torch.optim.lr_scheduler.ReduceLROnPlateau.patience = 5
-
-add_clip_gradient_handler.clip_value = 1e-2
 
 build_model_optimizer_scheduler.optimizer_class = \
     @torch.optim.Adam
@@ -49,15 +45,28 @@ train.num_data_workers = 1
 train.batch_size = 25
 train.seed = 0
 
+# Add handlers and set arguments
+# ==============================
+add_train_handlers.handler_names = [
+    "add_lr_scheduler_handler",
+    "add_autoclip_gradient_handler"
+]
+
+
 # Building up evaluation arguments
 # ================================
 evaluate.output_folder = @output_folder()
+
+BSSEvalScale.compute_permutation = True
+BSSEvalScale.source_labels = ['s1', 's2']
 
 nussl.separation.deep.DeepClustering.model_path = @model_path()
 nussl.separation.deep.DeepClustering.num_sources = 2
 evaluate.separation_algorithm = @nussl.separation.deep.DeepClustering
 evaluate.block_on_gpu = True
+evaluate.eval_class = @nussl.evaluation.BSSEvalScale
 evaluate.num_workers = 1
+evaluate.output_folder = @output_folder()
 evaluate.seed = 0
 
 # Building up analysis arguments

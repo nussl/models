@@ -6,26 +6,8 @@ import os
 import logging
 from torch import multiprocessing
 from ignite.contrib.handlers import ProgressBar
-
-@gin.configurable
-def add_train_handlers(engine, model, scheduler, handler_names):
-    for handler_name in handler_names:
-        if handler_name == "add_clip_gradient_handler":
-            add_clip_gradient_handler(engine, model)
-        elif handler_name == "add_lr_scheduler_handler":
-            add_lr_scheduler_handler(engine, scheduler)
-
-@gin.configurable
-def add_clip_gradient_handler(engine, model, clip_value):
-    @engine.on(nussl.ml.train.BackwardsEvents.BACKWARDS_COMPLETED)
-    def clip_gradient(engine):
-        torch.nn.utils.clip_grad_norm_(model.parameters(), clip_value)
-
-def add_lr_scheduler_handler(engine, scheduler):
-    @engine.on(nussl.ml.train.ValidationEvents.VALIDATION_COMPLETED)
-    def step_scheduler(engine):
-        val_loss = engine.state.epoch_history['validation/loss'][-1]
-        scheduler.step(val_loss)
+from .handlers import add_train_handlers
+from datetime import datetime
 
 @gin.configurable
 def build_model_optimizer_scheduler(model_config, optimizer_class, 
@@ -38,7 +20,8 @@ def build_model_optimizer_scheduler(model_config, optimizer_class,
 
 @gin.configurable
 def train(batch_size, loss_dictionary, num_data_workers, seed,
-          output_folder, num_epochs, device='cuda'):
+          output_folder, num_epochs, val_loss_dictionary=None,
+          combination_approach='combine_by_sum', device='cuda'):
     with gin.config_scope('train'):
         train_dataset = build_dataset()
     with gin.config_scope('val'):
@@ -63,12 +46,20 @@ def train(batch_size, loss_dictionary, num_data_workers, seed,
     val_dataloader = torch.utils.data.DataLoader(
         val_dataset, num_workers=num_data_workers, 
         batch_size=batch_size, shuffle=True)
+    
+    val_loss_dictionary = (
+        loss_dictionary 
+        if val_loss_dictionary is None
+        else val_loss_dictionary
+    )
 
     # Build the closures for each loop
     train_closure = nussl.ml.train.closures.TrainClosure(
-        loss_dictionary, optimizer, model)
+        loss_dictionary, optimizer, model, 
+        combination_approach=combination_approach)
     val_closure = nussl.ml.train.closures.ValidationClosure(
-        loss_dictionary, model)
+        val_loss_dictionary, model, 
+        combination_approach=combination_approach)
 
     # Build the engine and add handlers
     train_engine, val_engine = nussl.ml.train.create_train_and_validation_engines(
@@ -77,17 +68,24 @@ def train(batch_size, loss_dictionary, num_data_workers, seed,
         output_folder, model, optimizer, train_dataset, train_engine,
         val_data=val_dataloader, validator=val_engine)
     nussl.ml.train.add_stdout_handler(train_engine, val_engine)
-    nussl.ml.train.add_tensorboard_handler(output_folder, train_engine)
+
+    now = datetime.now()
+    tensorboard_folder = os.path.join(
+        output_folder, 'logs', now.strftime("%Y.%m.%d-%H.%M.%S"))
+
+    logging.info(f'Logging to {tensorboard_folder}')
+
+    nussl.ml.train.add_tensorboard_handler(tensorboard_folder, train_engine)
     nussl.ml.train.add_progress_bar_handler(train_engine, val_engine)
 
-    # clip_value and scheduler come from gin config
+    # handlers and their config come from gin config
     add_train_handlers(
-        train_engine, model, scheduler, 
-        [
-            'add_clip_gradient_handler',
-            'add_lr_scheduler_handler'
-        ]
+        train_engine, model, scheduler, optimizer, 
+        train_closure, device
     )
+
+    # print what we are using
+    logging.info(gin.operative_config_str())
     
     # run the engine
     train_engine.run(train_dataloader, max_epochs=num_epochs)
@@ -100,6 +98,7 @@ def cache(num_cache_workers, batch_size):
     for scope in ['train', 'val']:
         with gin.config_scope(scope):
             dataset = build_dataset()
+            dataset.cache_populated = False
             cache_dataloader = torch.utils.data.DataLoader(
                 dataset, num_workers=num_cache_workers, 
                 batch_size=batch_size)

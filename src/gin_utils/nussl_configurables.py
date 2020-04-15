@@ -77,6 +77,12 @@ gin.external_configurable(nussl.evaluation.BSSEvalScale, module=module)
 gin.external_configurable(nussl.evaluation.BSSEvalV4, module=module)
 gin.external_configurable(nussl.evaluation.PrecisionRecallFScore, module=module)
 
+# Closures
+module = 'nussl.ml.train.closures'
+gin.external_configurable(nussl.ml.train.closures.TrainClosure, module=module)
+gin.external_configurable(nussl.ml.train.closures.ValidationClosure, module=module)
+gin.external_configurable(nussl.ml.train.closures.Closure, module=module)
+
 # General nussl things
 gin.external_configurable(nussl.AudioSignal, module='nussl')
 gin.external_configurable(nussl.STFTParams, module='nussl')

@@ -14,9 +14,9 @@ dependencies:
   - redis
   - pip:
     - scaper
-    - git+git://github.com/interactiveaudiolab/nussl@refactor
+    - git+git://github.com/interactiveaudiolab/nussl
     - git+https://github.com/google/gin-config
     - IPython
     - ffmpy
-    - tqdm
-    - termtables
+    - p_tqdm
+    - nvgpu

@@ -1,0 +1,19 @@
+#!/bin/sh
+tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/mask-inference/run7:clip_percentile_1/config.gin all
+echo Queuing tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/mask-inference/run7:clip_percentile_1/config.gin all and sleeping while it starts...
+sleep 30
+tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/mask-inference/run8:clip_percentile_10/config.gin all
+echo Queuing tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/mask-inference/run8:clip_percentile_10/config.gin all and sleeping while it starts...
+sleep 30
+tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/mask-inference/run9:clip_percentile_25/config.gin all
+echo Queuing tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/mask-inference/run9:clip_percentile_25/config.gin all and sleeping while it starts...
+sleep 30
+tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/mask-inference/run10:clip_percentile_50/config.gin all
+echo Queuing tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/mask-inference/run10:clip_percentile_50/config.gin all and sleeping while it starts...
+sleep 30
+tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/mask-inference/run11:clip_percentile_90/config.gin all
+echo Queuing tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/mask-inference/run11:clip_percentile_90/config.gin all and sleeping while it starts...
+sleep 30
+tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/mask-inference/run12:clip_percentile_100/config.gin all
+echo Queuing tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/mask-inference/run12:clip_percentile_100/config.gin all and sleeping while it starts...
+sleep 30

@@ -40,12 +40,11 @@ def unginify(kls, kls_name=None):
     og_cls = get_original_class(kls_name)
     args_to_cls = inspect.getfullargspec(og_cls).args
     scope = gin.current_scope_str()
-    
     args = {}
     for arg in args_to_cls:
         queries = [
             f"{scope}/{kls_name}.{arg}",
-            f"{kls_name}.{arg}"
+            f"{kls_name}.{arg}",
         ]
         for query in queries:
             val = get_gin_argument(query)

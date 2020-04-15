@@ -1,0 +1,19 @@
+#!/bin/sh
+tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/chimera/run0:clip_percentile_1/config.gin all
+echo Queuing tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/chimera/run0:clip_percentile_1/config.gin all and sleeping while it starts...
+sleep 30
+tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/chimera/run1:clip_percentile_10/config.gin all
+echo Queuing tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/chimera/run1:clip_percentile_10/config.gin all and sleeping while it starts...
+sleep 30
+tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/chimera/run2:clip_percentile_25/config.gin all
+echo Queuing tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/chimera/run2:clip_percentile_25/config.gin all and sleeping while it starts...
+sleep 30
+tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/chimera/run3:clip_percentile_50/config.gin all
+echo Queuing tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/chimera/run3:clip_percentile_50/config.gin all and sleeping while it starts...
+sleep 30
+tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/chimera/run4:clip_percentile_90/config.gin all
+echo Queuing tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/chimera/run4:clip_percentile_90/config.gin all and sleeping while it starts...
+sleep 30
+tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/chimera/run5:clip_percentile_100/config.gin all
+echo Queuing tsp ./allocate.py 1 python main.py -exp wham/exp/autoclip/chimera/run5:clip_percentile_100/config.gin all and sleeping while it starts...
+sleep 30
